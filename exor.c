@@ -920,8 +920,8 @@ void set_drive(int n, const char *name)
 int load_drive(int n)
 {
         FILE *f;
-        long t;
-        f = fopen(drive[n].name, "r+");
+        unsigned long t;
+        f = fopen(drive[n].name, "rb+");
         if (!f) {
                 fprintf(stderr, "Couldn't open '%s'\n", drive[n].name);
                 return -1;
@@ -977,9 +977,15 @@ int load_drive(int n)
                         drive[n].tracks = 80;
                         drive[n].f = f;
                         printf("'%s' opened for drive %d (tracks=%d sectors=%d)\n", drive[n].name, n, drive[n].tracks, drive[n].sects);
+                } else if (t == 256 * 255 * 255) { // njc - 16646400
+                        drive[n].bytes  = 256;
+                        drive[n].sects  = 255;
+                        drive[n].tracks = 255;
+                        drive[n].f = f;
+                        printf("'%s' opened for HD drive %d (tracks=%d sectors=%d)\n", drive[n].name, n, drive[n].tracks, drive[n].sects);
                 } else {
                         fclose(f);
-                        printf("'%s' is not a valid disk\n", drive[n].name);
+                        printf("'%s' is not a valid disk (t=%ld)\n", drive[n].name, t);
                         return -1;
                 }
         } else {
